@@ -6,19 +6,24 @@ fn main() {
     let mut max_ones = 0;
     const ONE_MILLION_DOLLARS: u64 = 1_000_000;
 
-    let mut quick_rng = QuickRng {
-        pointer: 0,
-        state: rng.gen(),
-    };
+    let mut rng1 = QuickRng { state: rng.gen() };
+    let mut rng2 = QuickRng { state: rng.gen() };
 
     // Not checking for if we got enough ones because it is too costly for such a slim chance
     for _ in 0..ONE_MILLION_DOLLARS {
-        for _ in 0..231 {
-            let rand_number: u8 = rng.gen();
-            if rand_number % 4 == 0 {
-                ones += 1;
-            }
+        // Since we are now rolling 64 random numbers at a time we can only use 3 random numbers
+        // before we do something special.
+        for _ in 0..3 {
+            // By anding two random numbers we have a 25% chance of having a 1 for any bit,
+            // therefore the count of ones is the number of "ones rolled" on a four sided dice.
+            let state = rng1.get_state() & rng2.get_state();
+            ones += state.count_ones();
         }
+
+        // Last one is special because we only check 39 bits (That's what the last & is for)
+        let state = rng1.get_state() & rng2.get_state() & 0x7F_FF_FF_FF_FF;
+        ones += state.count_ones();
+
         if ones > max_ones {
             max_ones = ones;
         }
@@ -31,7 +36,6 @@ fn main() {
 
 struct QuickRng {
     state: u64,
-    pointer: u8,
 }
 
 impl QuickRng {
@@ -40,47 +44,9 @@ impl QuickRng {
         self.state ^= self.state >> 9;
     }
 
-    pub fn next_digit(&mut self) -> u8 {
-        // Get the next unread crumb
-        let result = self.state & (0b11 << self.pointer) >> self.pointer;
-        if self.pointer >= 126 {
-            self.pointer = 0;
-            self.next_state();
-        } else {
-            self.pointer += 2;
-        }
-        return result as u8;
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::QuickRng;
-
-    #[test]
-    fn randomness() {
-        let mut rng = QuickRng {
-            // Random state from from https://www.random.org/integers/?num=4&min=1&max=65536&col=8&base=16&format=plain&rnd=date.2024-08-15
-            state: 0xc7e5_9803_cf93_015d,
-            pointer: 0,
-        };
-        let trials = (2 as u32).pow(32);
-        let success_probability = 0.25;
-
-        let mut counts = [0, 0, 0, 0];
-        for _ in 0..trials {
-            counts[rng.next_digit() as usize] += 1;
-        }
-
-        let mean = success_probability * trials as f32;
-        let mut deviation = mean * (1.0 - success_probability);
-        deviation = deviation.sqrt();
-        for i in counts {
-            println!("{}", i);
-
-            // 68% chance of falling within one standard deviations of the mean
-            assert!(mean - deviation <= i as f32 && i as f32 <= mean + deviation);
-        }
-        // probability they are all in that range by chance = .68^4 or 16%
+    pub fn get_state(&mut self) -> u64 {
+        let result = self.state;
+        self.next_state();
+        return result;
     }
 }
