@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::{rngs::ThreadRng, Rng};
 use rayon::prelude::*;
 
 fn main() {
@@ -16,11 +16,10 @@ fn main() {
 }
 
 fn check_n_games(n: u64) -> u32 {
-    let mut rng = rand::thread_rng();
+    let rng = rand::thread_rng();
     let mut ones = 0;
     let mut max_ones = 0;
-    let mut rng1 = QuickRng { state: rng.gen() };
-    let mut rng2 = QuickRng { state: rng.gen() };
+    let mut quicker_rng = QuickerRng::new(rng);
 
     // Not checking for if we got enough ones because it is too costly for such a slim chance
     for _ in 0..n {
@@ -29,12 +28,13 @@ fn check_n_games(n: u64) -> u32 {
         for _ in 0..3 {
             // By anding two random numbers we have a 25% chance of having a 1 for any bit,
             // therefore the count of ones is the number of "ones rolled" on a four sided dice.
-            let state = rng1.get_state() & rng2.get_state();
+            let state = quicker_rng.get_chances();
+            quicker_rng.next_state();
             ones += state.count_ones();
         }
 
         // Last one is special because we only check 39 bits (That's what the last & is for)
-        let state = rng1.get_state() & rng2.get_state() & 0x7F_FF_FF_FF_FF;
+        let state = quicker_rng.get_chances() & 0x7F_FF_FF_FF_FF;
         ones += state.count_ones();
 
         if ones > max_ones {
@@ -45,19 +45,29 @@ fn check_n_games(n: u64) -> u32 {
     return max_ones;
 }
 
-struct QuickRng {
-    state: u64,
+struct QuickerRng {
+    state_1: u64,
+    state_2: u64,
 }
 
-impl QuickRng {
-    pub fn next_state(&mut self) {
-        self.state ^= self.state << 7;
-        self.state ^= self.state >> 9;
+impl QuickerRng {
+    fn new(mut rng: ThreadRng) -> Self {
+        Self {
+            state_1: rng.gen(),
+            state_2: rng.gen(),
+        }
     }
 
-    pub fn get_state(&mut self) -> u64 {
-        let result = self.state;
-        self.next_state();
-        return result;
+    fn next_state(&mut self) {
+        self.state_1 ^= self.state_1 << 7;
+        self.state_2 ^= self.state_2 << 7;
+
+        self.state_1 ^= self.state_1 >> 9;
+        self.state_2 ^= self.state_2 >> 9;
+    }
+
+    // TODO remove alocate here
+    fn get_chances(&self) -> u64 {
+        self.state_1 & self.state_2
     }
 }
