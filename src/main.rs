@@ -1,16 +1,29 @@
 use rand::Rng;
+use rayon::prelude::*;
 
 fn main() {
+    const ONE_BILLION_ROWS: u64 = 1_000_000_000;
+    let step_size = ONE_BILLION_ROWS / 12 + 1;
+
+    let max_ones = (0_usize..12)
+        .into_par_iter()
+        .map(|_| check_n_games(step_size))
+        .max()
+        .unwrap_or(0_u32);
+
+    println!("Highest Ones Roll: {}", max_ones);
+    println!("Number of Roll Sessions: {}", step_size * 12);
+}
+
+fn check_n_games(n: u64) -> u32 {
     let mut rng = rand::thread_rng();
     let mut ones = 0;
     let mut max_ones = 0;
-    const ONE_BILLION_ROWS: u64 = 1_000_000_000;
-
     let mut rng1 = QuickRng { state: rng.gen() };
     let mut rng2 = QuickRng { state: rng.gen() };
 
     // Not checking for if we got enough ones because it is too costly for such a slim chance
-    for _ in 0..ONE_BILLION_ROWS {
+    for _ in 0..n {
         // Since we are now rolling 64 random numbers at a time we can only use 3 random numbers
         // before we do something special.
         for _ in 0..3 {
@@ -29,9 +42,7 @@ fn main() {
         }
         ones = 0;
     }
-
-    println!("Highest Ones Roll: {}", max_ones);
-    println!("Number of Roll Sessions: {}", ONE_BILLION_ROWS);
+    return max_ones;
 }
 
 struct QuickRng {
