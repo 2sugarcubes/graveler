@@ -9,16 +9,16 @@ fn main() {
         .into_par_iter()
         .map(|_| check_n_games(step_size))
         .max()
-        .unwrap_or(0_u32);
+        .unwrap_or(0_u8);
 
     println!("Highest Ones Roll: {}", max_ones);
     println!("Number of Roll Sessions: {}", step_size * 12);
 }
 
-fn check_n_games(n: u64) -> u32 {
+fn check_n_games(n: u64) -> u8 {
     let rng = rand::thread_rng();
-    let mut ones = 0;
-    let mut max_ones = 0;
+    let mut ones = 0_u8;
+    let mut max_ones = 0_u8;
     let mut quicker_rng = QuickerRng::new(rng);
 
     // Not checking for if we got enough ones because it is too costly for such a slim chance
@@ -30,16 +30,21 @@ fn check_n_games(n: u64) -> u32 {
             // therefore the count of ones is the number of "ones rolled" on a four sided dice.
             let state = quicker_rng.get_chances();
             quicker_rng.next_state();
-            ones += state.count_ones();
+            ones += state.count_ones() as u8;
         }
 
         // Last one is special because we only check 39 bits (That's what the last & is for)
         let state = quicker_rng.get_chances() & 0x7F_FF_FF_FF_FF;
-        ones += state.count_ones();
+        ones += state.count_ones() as u8;
 
+        //max_ones = max_ones.max(ones);
         if ones > max_ones {
             max_ones = ones;
         }
+        //max_ones = unsafe {
+        //   std::mem::transmute::<bool, u8>(ones < max_ones) * max_ones
+        //    + std::mem::transmute::<bool, u8>(ones >= max_ones) * ones
+        //};
         ones = 0;
     }
     return max_ones;
