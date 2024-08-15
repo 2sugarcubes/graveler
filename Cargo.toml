@@ -3,7 +3,7 @@ name = "graveler"
 version = "0.1.0"
 edition = "2021"
 
-[release]
+[profile.release]
 lto = "fat"
 
 [dependencies]
