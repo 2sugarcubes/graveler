@@ -1,2 +1,2 @@
 time:
-	cargo build --release && time target/release/graveler
+	RUSTFLAGS="-C target-cpu=native" cargo build --release && time target/release/graveler
