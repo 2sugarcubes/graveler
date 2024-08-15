@@ -4,13 +4,13 @@ fn main() {
     let mut rng = rand::thread_rng();
     let mut ones = 0;
     let mut max_ones = 0;
-    const ONE_MILLION_DOLLARS: u64 = 1_000_000;
+    const ONE_BILLION_ROWS: u64 = 1_000_000_000;
 
     let mut rng1 = QuickRng { state: rng.gen() };
     let mut rng2 = QuickRng { state: rng.gen() };
 
     // Not checking for if we got enough ones because it is too costly for such a slim chance
-    for _ in 0..ONE_MILLION_DOLLARS {
+    for _ in 0..ONE_BILLION_ROWS {
         // Since we are now rolling 64 random numbers at a time we can only use 3 random numbers
         // before we do something special.
         for _ in 0..3 {
@@ -31,7 +31,7 @@ fn main() {
     }
 
     println!("Highest Ones Roll: {}", max_ones);
-    println!("Number of Roll Sessions: {}", ONE_MILLION_DOLLARS);
+    println!("Number of Roll Sessions: {}", ONE_BILLION_ROWS);
 }
 
 struct QuickRng {
