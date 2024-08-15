@@ -3,6 +3,9 @@ name = "graveler"
 version = "0.1.0"
 edition = "2021"
 
+[release]
+lto = "fat"
+
 [dependencies]
 rand = "0.8.5"
 rayon = "1.10.0"
