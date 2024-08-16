@@ -3,8 +3,16 @@ name = "graveler"
 version = "0.1.0"
 edition = "2021"
 
-#[build]
-#rustflags = ["-C", "target-cpu=native"]
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "fast_rng"
+harness = false
+
+[[bin]]
+harness = false
+name = "graveler"
 
 [profile.release]
 lto = "fat"
