@@ -1,22 +1,16 @@
-use rand::Rng;
+use graveler::check_n_games;
+use rayon::prelude::*;
 
 fn main() {
-    let mut rng = rand::thread_rng();
-    let mut ones = 0;
-    let mut max_ones = 0;
-    const ONE_MILLION_DOLLARS: u64 = 1_000_000;
-    for _ in 0..ONE_MILLION_DOLLARS {
-        for _ in 0..231 {
-            let rand_number: u8 = rng.next();
-            if rand_number % 4 == 1 {
-                ones += 1;
-            }
-        }
-        if ones > max_ones {
-            max_ones = ones;
-        }
-    }
+    const ONE_BILLION_ROWS: u64 = 1_000_000_000;
+    let step_size = ONE_BILLION_ROWS / 12 + 1;
 
-    println!("Highest Ones Roll: {}", ones);
-    println!("Number of Roll Sessions: {}", ONE_MILLION_DOLLARS);
+    let max_ones = (0_usize..12)
+        .into_par_iter()
+        .map(|_| check_n_games(step_size))
+        .max()
+        .unwrap_or(0_u8);
+
+    println!("Highest Ones Roll: {}", max_ones);
+    println!("Number of Roll Sessions: {}", step_size * 12);
 }
