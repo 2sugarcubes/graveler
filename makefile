@@ -1,3 +1,6 @@
+make:
+	RUSTFLAGS="-C target-cpu=native" cargo build --release
+
 time:
 	RUSTFLAGS="-C target-cpu=native" cargo bench
 

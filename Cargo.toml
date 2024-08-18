@@ -1,6 +1,6 @@
 [package]
 name = "graveler"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 
 [dev-dependencies]
@@ -9,6 +9,7 @@ criterion = "0.5"
 [[bench]]
 name = "fast_rng"
 harness = false
+lto = "fat"
 
 [[bin]]
 harness = false
@@ -16,7 +17,8 @@ name = "graveler"
 
 [profile.release]
 lto = "fat"
-#codegen-units = 1
+codegen-units = 1
+panic = "abort"
 
 [dependencies]
 rand = "0.8.5"
