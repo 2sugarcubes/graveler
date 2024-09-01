@@ -1,12 +1,14 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use graveler::{check_n_games, QuickerRng};
+use graveler::{check_from_half_games, check_n_games, QuickerRng};
 
 pub fn check_games(c: &mut Criterion) {
     c.bench_function("check 1b (threaded estimate)", |b| {
         b.iter(|| check_n_games(1_000_000_000 / 12 + 1))
     });
     c.bench_function("check 1m", |b| b.iter(|| check_n_games(1_000_000)));
-
+    c.bench_function("check 1b cheaky (threaded estimate)", |b| {
+        b.iter(|| check_from_half_games())
+    });
     c.bench_function("gen 1m numbers", |b| {
         b.iter(|| gen_numbers(black_box(1_000_000)))
     });

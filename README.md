@@ -9,7 +9,7 @@ My entry into the [ShoddyCast Graveler Softlock Challenge](https://www.youtube.c
 3. Run `make` or `RUSTFLAGS="-C target-cpu=native" cargo build --release`
 4. Run `time target/release/graveler` or you may need to do [some powershell magic](https://superuser.com/questions/228056/windows-equivalent-to-unix-time-command) on Windows
 5. You are done :)
-6. if you want to do more (This didn't do any good for my laptop) you can try [PGO](https://github.com/Kobzol/cargo-pgo)
+6. if you want to do more (This didn't do any good for me with my laptop) you can try [PGO](https://github.com/Kobzol/cargo-pgo)
 
 ## FAQ
 
@@ -19,14 +19,16 @@ This entry requires specific CPU instructions specific to the CPU on the user's 
 
 ### How fast is it?
 
-I got it down to 0.6 seconds on my admittedly weak laptop with all other processes closed and power-save switched off.
+I got it down to 0.31 seconds on my admittedly weak laptop with all other processes closed and power-save switched off.
+
+The current iteration should benefit greatly from more cores, though that will require editing some code to limit how much it overshoots the target.
 
 #### What did you run it on?
 
 - Model
   - Inspiron 14 7420 2-in-1
 - CPU
-  - 12th Gen i7-1255U
+  - 12th Gen i7-1255U (12 threads)
 - Memory
   - 16GB DDR4, 3200 MHz
 - OS
