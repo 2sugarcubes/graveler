@@ -3,6 +3,7 @@ use rayon::prelude::*;
 
 fn main() {
     const THREADS: u64 = 12;
+    const STEP_SIZE: u64 = 83340505; // binom(12911, 2)
 
     // Generate 12 threads
     let results = (0..THREADS)
@@ -11,11 +12,11 @@ fn main() {
         // LEAST one billion games)
         .map(|_| check_from_half_games())
         // Find the maximum of the results
-        .max_by_key(|a| a.0)
+        .max()
         // Return 0 if all threads paniced
-        .unwrap_or((0, 0));
+        .unwrap_or(0);
 
     // Print statistics like in the video
-    println!("Highest Ones Roll: {}", results.0);
-    println!("Number of Roll Sessions: {}", results.1 * THREADS);
+    println!("Highest Ones Roll: {}", results);
+    println!("Number of Roll Sessions: {}", STEP_SIZE * THREADS);
 }
