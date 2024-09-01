@@ -33,16 +33,25 @@ pub fn check_n_games(n: u64) -> u32 {
 
 pub fn pregenerate_12911_half_games() -> [[u64; 4]; 12_911] {
     let mut results: [[u64; 4]; 12911] = [[0; 4]; 12911];
-    let mut rng: u64 = rand::thread_rng().gen();
-    let mut inner: [u64; 4] = [0, 0, 0, 0];
+    let mut rng = rand::thread_rng();
+    let mut inner: [u64; 4] = [0; 4];
 
     for i in 0..1290 {
-        for j in 0..4 {
-            inner[j] = rng;
+        let mut random_number: u64 = rng.gen();
+        inner[0] = random_number;
 
-            rng ^= rng << 7;
-            rng ^= rng >> 9;
-        }
+        random_number ^= random_number << 7;
+        random_number ^= random_number >> 9;
+        inner[1] = random_number;
+
+        random_number ^= random_number << 7;
+        random_number ^= random_number >> 9;
+        inner[2] = random_number;
+
+        random_number ^= random_number << 7;
+        random_number ^= random_number >> 9;
+        inner[3] = random_number;
+
         results[i] = inner;
     }
 
