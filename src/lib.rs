@@ -31,6 +31,63 @@ pub fn check_n_games(n: u64) -> u32 {
     return max_ones;
 }
 
+/// By generating this specific number of sets of random numbers we can reuse them by combining
+/// them with different random number sets, because binom(12911,2) > 10^9 (number of games) / 12 (number of cores). 1_000_086_060 specifically.
+pub fn pregenerate_12911_half_games() -> [[u64; 4]; 12_911] {
+    let mut results: [[u64; 4]; 12911] = [[0; 4]; 12911];
+    let mut rng = rand::thread_rng();
+    let mut inner: [u64; 4] = [0; 4];
+
+    for i in 0..1290 {
+        let mut random_number: u64 = rng.gen();
+        inner[0] = random_number;
+
+        random_number ^= random_number << 7;
+        random_number ^= random_number >> 9;
+        inner[1] = random_number;
+
+        random_number ^= random_number << 7;
+        random_number ^= random_number >> 9;
+        inner[2] = random_number;
+
+        random_number ^= random_number << 7;
+        random_number ^= random_number >> 9;
+        inner[3] = random_number;
+
+        results[i] = inner;
+    }
+
+    results
+}
+
+/// Play each unique pairing of two random half games. Returning the maximum number of ones in a
+/// game, and the number of games played.
+pub fn play_game_sets(half_games: [[u64; 4]; 12_911]) -> u32 {
+    let mut max_ones = 0;
+
+    for i in 0..12910 {
+        let game_a = half_games[i];
+        for j in (i + 1)..12911 {
+            let game_b = half_games[j];
+            let mut ones = (game_a[0] & game_b[0]).count_ones();
+            ones += (game_a[1] & game_b[1]).count_ones();
+            ones += (game_a[2] & game_b[2]).count_ones();
+            ones += (game_a[3] & game_b[3] & 0x7F_FF_FF_FF_FF).count_ones();
+
+            if ones > max_ones {
+                max_ones = ones;
+            }
+        }
+    }
+
+    max_ones
+}
+
+pub fn check_from_half_games() -> u32 {
+    play_game_sets(pregenerate_12911_half_games())
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct QuickerRng {
     pub state_1: u64,
     pub state_2: u64,

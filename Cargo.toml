@@ -4,16 +4,19 @@ version = "1.1.0"
 edition = "2021"
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.5.0"
 
 [[bench]]
 name = "fast_rng"
 harness = false
-lto = "fat"
 
 [[bin]]
 harness = false
 name = "graveler"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+panic = "abort"
 
 [profile.release]
 lto = "fat"
