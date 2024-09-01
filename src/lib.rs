@@ -31,6 +31,8 @@ pub fn check_n_games(n: u64) -> u32 {
     return max_ones;
 }
 
+/// By generating this specific number of sets of random numbers we can reuse them by combining
+/// them with different random number sets, because binom(12911,2) > 10^9 (number of games) / 12 (number of cores). 1_000_086_060 specifically.
 pub fn pregenerate_12911_half_games() -> [[u64; 4]; 12_911] {
     let mut results: [[u64; 4]; 12911] = [[0; 4]; 12911];
     let mut rng = rand::thread_rng();
@@ -58,9 +60,10 @@ pub fn pregenerate_12911_half_games() -> [[u64; 4]; 12_911] {
     results
 }
 
-pub fn play_game_sets(half_games: [[u64; 4]; 12_911]) -> (u32, u64) {
+/// Play each unique pairing of two random half games. Returning the maximum number of ones in a
+/// game, and the number of games played.
+pub fn play_game_sets(half_games: [[u64; 4]; 12_911]) -> u32 {
     let mut max_ones = 0;
-    let mut count = 0;
 
     for i in 0..12910 {
         let game_a = half_games[i];
@@ -71,17 +74,16 @@ pub fn play_game_sets(half_games: [[u64; 4]; 12_911]) -> (u32, u64) {
             ones += (game_a[2] & game_b[2]).count_ones();
             ones += (game_a[3] & game_b[3] & 0x7F_FF_FF_FF_FF).count_ones();
 
-            count += 1;
             if ones > max_ones {
                 max_ones = ones;
             }
         }
     }
 
-    (max_ones, count)
+    max_ones
 }
 
-pub fn check_from_half_games() -> (u32, u64) {
+pub fn check_from_half_games() -> u32 {
     play_game_sets(pregenerate_12911_half_games())
 }
 
@@ -117,17 +119,5 @@ impl QuickerRng {
     pub fn get_chances(&mut self) -> u64 {
         self.next_state();
         self.state_1 & self.state_2
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    #[test]
-    fn check_game_count() {
-        let half_games = pregenerate_12911_half_games();
-        let results = play_game_sets(half_games);
-        println!("Played {} games with at most {} ones", results.1, results.0);
-        assert!(results.1 > 1_000_000_000 / 12);
     }
 }
